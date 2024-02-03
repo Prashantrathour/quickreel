@@ -28,7 +28,7 @@ const Home = () => {
         formData.append('sensitivity', sensitivity);
   
       
-        const response = await axios.post('http://localhost:8000/process-audio', formData,{
+        const response = await axios.post('http://localhost:3001/process-audio', formData,{
           headers: {
             'Content-Type': 'multipart/form-data',
           },});

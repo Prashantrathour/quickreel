@@ -1,69 +1,79 @@
-const express = require('express');
-const multer = require('multer');
-const fluentffmpeg = require('fluent-ffmpeg');
-const path = require('path');
-const fs = require('fs/promises');
 
+import express from 'express';
+import multer from 'multer';
+import fs from 'fs';
+import path from 'path';
+import cors from 'cors';
+import startAudioFixing  from './audioUtils.js';
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+// Get the directory path of the current module
+const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
-const port = process.env.PORT || 3001;
 
 app.use(express.json());
+app.use(cors());
 
-const storage = multer.memoryStorage();
+// Set up Multer for file upload
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/');
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.originalname);
+  },
+});
+
 const upload = multer({ storage: storage });
 
-app.post('/process-audio', upload.single('audio'), async (req, res) => {
+// Upload endpoint
+app.post('/upload', upload.single('audio'), async (req, res) => {
+  
   try {
-    if (!req.file) {
-      return res.status(400).json({ success: false, message: 'No audio file provided' });
-    }
-
-    const audioBuffer = req.file.buffer;
-
-    // Process audio logic using fluent-ffmpeg
-    const processedBuffer = await processAudio(audioBuffer);
-
-    // Save the processed audio to a file
-    const outputPath = path.join(__dirname, 'uploads', 'processed-audio.wav');
-    await fs.writeFile(outputPath, processedBuffer);
-
-    res.json({ success: true, message: 'Processing complete' });
+    res.status(201).send('File uploaded successfully');
   } catch (error) {
-    console.error('Error processing audio:', error);
-    res.status(500).json({ success: false, message: 'Internal Server Error', error: error.message });
+    res.status(500).send(error.message);
   }
 });
 
-app.get('/processed-audio.wav', (req, res) => {
-  const filePath = path.join(__dirname, 'uploads', 'processed-audio.wav');
-  res.sendFile(filePath);
+// Processing endpoint
+app.get('/process/:filename', async (req, res) => {
+  const filePath = path.join(__dirname, 'uploads', req.params.filename);
+  
+  try {
+   
+    const processedAudio = await startAudioFixing(filePath);
+    
+    fs.unlinkSync(filePath)
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+});
+app.get('/download', async (req, res) => {
+  const filePath = path.join(__dirname, 'output', 'output-file.mp3');
+
+  try {
+      if (fs.existsSync(filePath)) {
+          res.download(filePath, 'output-file.mp3', (err) => {
+              if (err) {
+                  console.error('Error downloading file:', err);
+                  res.status(500).send('Error downloading file');
+              } else {
+                  console.log('File downloaded successfully');
+                  fs.unlinkSync(filePath); // Delete the file after download
+              }
+          });
+      } else {
+          // File not found, send a 404 response
+          console.error('File not found:', filePath);
+          res.status(404).send('File not found');
+      }
+  } catch (error) {
+      console.error('Error:', error.message);
+      res.status(500).send(error.message);
+  }
 });
 
-app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
-});
-
-async function processAudio(audioBuffer) {
-  return new Promise((resolve, reject) => {
-    try {
-      const ffmpegCommand = fluentffmpeg()
-        .input(audioBuffer)
-        .audioCodec('pcm_s16le')
-        .toFormat('wav');
-
-      ffmpegCommand.on('end', (stdout, stderr) => {
-        console.log('Audio processing complete');
-        const processedBuffer = fs.readFileSync('temp.wav');
-        resolve(processedBuffer);
-      }).on('error', (err) => {
-        console.error('Error converting audio:', err);
-        reject(err);
-      });
-
-      ffmpegCommand.save('temp.wav');
-    } catch (error) {
-      console.error('Error during audio processing setup:', error);
-      reject(error);
-    }
-  });
-}
+const PORT =  5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
