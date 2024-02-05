@@ -53,6 +53,9 @@ app.get("/process/:filename", async (req, res) => {
     res.status(500).send(error.message);
   }
 });
+app.get("/",(req,res)=>{
+  res.json("API Working !")
+})
 app.get("/download", async (req, res) => {
   const filePath = path.join(__dirname, "output", "output-file.mp3");
   res.set({
