@@ -50,10 +50,3 @@ The frontend server will start at `http://localhost:3000` and open in your defau
 - lodash
 - Other dependencies listed in the `package.json` file
 
-
-
-Special thanks to the developers of the libraries and frameworks used in this project.
-
-Feel free to contribute to this project by submitting issues or pull requests.
-
-For any questions or inquiries, please contact [Your Name] at [your@email.com].
