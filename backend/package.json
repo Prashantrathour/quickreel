@@ -16,6 +16,7 @@
     "audio-decode": "^2.2.0",
     "audiobuffer-to-wav": "^1.0.0",
     "cors": "^2.8.5",
+    "dotenv": "^16.4.1",
     "express": "^4.18.2",
     "fluent-ffmpeg": "^2.1.2",
     "lodash": "^4.17.21",

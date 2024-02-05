@@ -7,11 +7,7 @@ import pkg from 'lodash';
 const { min, max, mean,chunk, flattenDeep } = pkg;
 import decode from 'audio-decode';
 
-// const testFileName = './test.ogg';
 
-
-
-// export const SILENCE_LEVEL = 0;
 const SILENCE_LEVEL = 0.00003;
 
  const toBuffer = (ab) => {

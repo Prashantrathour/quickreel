@@ -1,9 +1,11 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import WaveSurfer from 'wavesurfer.js';
 import './Waveform.css';
 
 const Waveform = ({ originalAudioFile, processedAudioFile }) => {
   const waveformRef = useRef(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [waveSurfer, setWaveSurfer] = useState(null);
 
   useEffect(() => {
     if (waveformRef.current) {
@@ -13,30 +15,44 @@ const Waveform = ({ originalAudioFile, processedAudioFile }) => {
         progressColor: 'red',
         responsive: true,
       });
-
-      if (originalAudioFile) {
-        wavesurfer.load(URL.createObjectURL(originalAudioFile));
-      }
-
-      if (processedAudioFile) {
-        
-        wavesurfer.loadBlob(processedAudioFile);
-      }
-
+      setWaveSurfer(wavesurfer);
       return () => {
-      
-        wavesurfer.stop();
         wavesurfer.destroy();
       };
     }
-  }, [originalAudioFile, processedAudioFile]);
+  }, []);
+
+  useEffect(() => {
+    if (waveSurfer && originalAudioFile) {
+      waveSurfer.loadBlob(originalAudioFile);
+    }
+  }, [waveSurfer, originalAudioFile]);
+
+  useEffect(() => {
+    if (waveSurfer && processedAudioFile) {
+      waveSurfer.loadBlob(processedAudioFile);
+    }
+  }, [waveSurfer, processedAudioFile]);
+
+  const handlePlayPause = () => {
+    if (waveSurfer) {
+      if (!isPlaying) {
+        waveSurfer.play();
+      } else {
+        waveSurfer.pause();
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
 
   return (
-    <div className="waveform-container">
-      <div className="waveform" ref={waveformRef}></div>
+    <div>
+      <div className="waveform-container">
+        <div className="waveform" ref={waveformRef}></div>
+      </div>
+      <button onClick={handlePlayPause}>{isPlaying ? 'Pause' : 'Play'}</button>
     </div>
   );
 };
 
 export default Waveform;
-

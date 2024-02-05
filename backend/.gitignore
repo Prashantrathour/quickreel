@@ -1,0 +1,37 @@
+# Ignore .env files
+.env
+
+# Ignore node_modules directory
+node_modules/
+
+# Ignore log files
+*.log
+
+# Ignore Mac files
+.DS_Store
+
+# Ignore editor-specific files
+.vscode/
+.idea/
+
+# Ignore npm-debug.log
+npm-debug.log*
+
+# Ignore yarn error log
+yarn-error.log
+
+# Ignore OS generated files
+Thumbs.db
+.DS_Store?
+
+# Ignore .env.local files
+.env.local
+
+# Ignore .env.development.local files
+.env.development.local
+
+# Ignore .env.test.local files
+.env.test.local
+
+# Ignore .env.production.local files
+.env.production.local
